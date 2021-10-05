@@ -76,6 +76,3 @@ class Scores{
     return streak;
   }
 }
-      
-    
-    
