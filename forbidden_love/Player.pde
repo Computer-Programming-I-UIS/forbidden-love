@@ -90,12 +90,68 @@ class Player extends Actor {
    for (int c = 0; c < projectiles.size(), c++){
      Projectile p = projectiles.get(c);
      
-     //Si esta fuera de pantalla el proyectill
+     //Si el proyectill esta fuera de pantalla.
      if (p.dead){
        projectiles.remove(p);
        continue;
      }
      
+     // si un proyectil golpea al jefe.
+     if(boss != null && boss.state != boss.dead && p.hit(boss)){
+       if(p.hitBossPart == p.body){
+         boss.decreaseHealth(p.power*1);
+         boss.lastMilTint = millis();
+         
+         Particle particle = new Particle(p.loc.x, p.loc.y, Particle.TEXT,0, "-"+p.power);
+         particle.floatUp = true;
+         particles.add(particle);
+         
+         projectiles.remove(p);
+         scores.shotHit++;
+         continue;
+       } else if (p.hitBossPart == p.arm) {
+         boss.decreaseHealth(p.power*.25);
+         boss.lastMilTint = millis();
+         
+         Particle particle = new Particle(p.loc.x, p.loc.y, Particle.TEXT,0, "-"+p.power*.25);
+         particle.floatUp = true;
+         particles.add(particle);
+         
+         projectiles.remove(p);
+         scores.shotHit++;
+         continue;
+       } else if (p.hitBossPart == p.eye) {
+         boss.decreaseHealth(p.power*6.5);
+         boss.lastMilTint = millis();
+         
+         Particle particle = new Particle(p.loc.x, p.loc.y, Particle.TEXT,0, "-"+p.power*6.5);
+         particle.floatUp = true;
+         particles.add(particle);
+         
+         projectiles.remove(p);
+         scores.shotHit++;
+         continue;
+       } else if(!p.bounce){
+         //Rebotan si golpean en modo defensivo.
+         
+         float xDif = max(p.loc.x,boss.loc.x) - min(p.loc.x,boss.loc.x);
+         float yDif = max(p.loc.y,boss.loc.y) - min(p.loc.y,boss.loc.y);
+         
+         float angle = atan2(yDif,xDif);
+         
+         float angleDifference = angle - p.vel.heading();
+         angleDifference = p.loc.y < boss.locy ? -angleDifference : angleDifference;
+         
+         float newAngle = PI-p.vel.heading()-angleDiffererence;
+         
+         PVector temp = new PVector(p.vel.mag(),0);
+         
+         temp.rotate(newAngle);
+         
+         p.vel = temp;
+         p.bounced = true;
+       }
+     }
      
  
    
